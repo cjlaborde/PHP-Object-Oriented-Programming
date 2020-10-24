@@ -88,10 +88,45 @@ echo $user->avatar(80); // 80
 25. We can pass this object into other objects.
 26. Everything inside it will be pass around with it so we can use it.
 27. This is main advantage of OOP you work with objects that can be easily pass around.
+28. It really cleans up your code.
 
+### var_dump is your friend
+1. When you building classes soon enough you will need to debug.
+2. If you are working with packages that you are pulling into your project.
+3. and you want to see what is available.
+4. In this case you just want to var_dump your object.
+```php
+class User
+{
+    public $username = 'alex';
 
+    public function fullName()
+    {
+        return 'Alex Garrett';
+    }
 
+    public function avatar($size = 60)
+    {
+        return $size;
+    }
+}
 
+$user = new User;
+var_dump($user);
+/*
+object(User)[2]
+  public 'username' => string 'alex' (length=4)
+*/
+```
+5. We see here we only see this property
+6. We don't see the methods
+7. We only seeing the public property
+8. To also dump the method
+```php
+var_dump($user->fullName()); // 'Alex Garrett'
+var_dump($user->avatar()); // 60
+```
+9. When you are stuck with anything go ahead and use var_dump
 
 
 

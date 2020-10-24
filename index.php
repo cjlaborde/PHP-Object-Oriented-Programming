@@ -8,7 +8,10 @@
 </head>
 
 <body>
-    <a href="/1-classes-methods-and-properties">Classes methods and properties</a>
+    <ul>
+        <li><a href="/1-classes-methods-and-properties">Classes methods and properties</a></li>
+        <li><a href="/2-vardump-is-your-friend">var_dump is your friend</a></li>
+    </ul>
 </body>
 
 </html>
