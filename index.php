@@ -12,6 +12,7 @@
         <li><a href="/1-classes-methods-and-properties">Classes methods and properties</a></li>
         <li><a href="/2-vardump-is-your-friend">var_dump is your friend</a></li>
         <li><a href="/3-getters-and-setters">Getters and setters</a></li>
+        <li><a href="/4-encapsulation">Encapsulation</a></li>
     </ul>
 </body>
 

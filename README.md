@@ -304,3 +304,213 @@ $user->email = 'ererewrewDEFEFR';
 echo $user->email; // ererewrewDEFEFR
 ```
 23. To deal with this we will dicuss Encapsulation in next lesson.
+
+### Encapsulation
+1. Encapsulation is a term that makes people run a mile away
+2. But this is one term is actually easy to understand
+3. We already see how we set properties within classes
+4. We see the problem with getters and setters
+5. Since we can bypass setters and getter to change properties
+6. Encapsulation is just changing the visibilities of your properties
+```php
+class User
+{
+    public $email;
+
+    public function setEmail($email)
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+        $this->email = $email;
+    }
+
+    public function getEmail()
+    {
+        return strtolower($this->email);
+    }
+}
+
+$user = new User;
+$user->email = 'ererwerewr';
+
+echo $user->email; // ererwerewr
+
+die();
+```
+7. To fix this issue we change `public $email;` to `protected $email;`
+```php
+class User
+{
+    // public $email;
+    protected $email; // Cannot access protected property User::$email in
+
+    public function setEmail($email)
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+        $this->email = $email;
+    }
+
+    public function getEmail()
+    {
+        return strtolower($this->email);
+    }
+}
+
+$user = new User;
+$user->email = 'ererwerewr';
+
+echo $user->email; // ererwerewr
+
+die();
+$user->setEmail('john@gmail.com');
+```
+8. We can still set it using classes
+```php
+class User
+{
+    // public $email;
+    protected $email;
+
+    public function setEmail($email)
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+        $this->email = $email;
+    }
+
+    public function getEmail()
+    {
+        return strtolower($this->email);
+    }
+}
+
+$user = new User;
+
+$user->setEmail('john@gmail.com');
+echo $user->getEmail(); // john@gmail.com
+```
+9. Public means property is public accesible.
+10. Protected means is only allowed to be set in the class.
+
+#### private
+1. Setting the property to private
+2. We see the same type of error
+```php
+class User
+{
+    private $email;
+
+    public function setEmail($email)
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+        $this->email = $email;
+    }
+
+    public function getEmail()
+    {
+        return strtolower($this->email);
+    }
+}
+
+$user = new User;
+$user->email = 'ererwerewr';
+
+echo $user->email; // ererwerewr
+die();
+```
+3. The general rule is set properties to private or protected unless you absolutely need these properties to be accessed outside of your class.
+4. We don't always need getters and setters, sometimes we just need a property in our class to store something.
+
+#### Class Validation example
+1. For example we could have an array of things that would only set internally in the class.
+2. What we can do is loop through all the $rules and $data and check them against them.
+3. We also might happen a particular validation might fail.
+4. Now were would we store all these error messenges.
+5. You don't want to set errors outside the class that makes no sense.
+6. Instead internally we set there errors.
+7. Check that is not empty
+8. Essentially after we call the validate method
+9. we check if it fails by checking the errors array
+10. Since we don't need to access error array all we doing is checking the errors array
+
+```php
+class Validator
+{
+    protected $errors = [];
+    public function validate($data, $rules)
+    {
+        //
+
+        $this->errors[] = 'The email is required.';
+    }
+
+    public function fails()
+    {
+        return !empty($this->errors);
+    }
+
+    public function getError()
+    {
+        return $this->errors;
+    }
+}
+
+$validator = new Validator;
+$validator->validate([''], ['required']);
+
+if ($validator->fails()) {
+    die('Fails'); // Fails
+}
+```
+11. Whereas if there was not any error then it passes
+```php
+class Validator
+{
+    protected $errors = [];
+    public function validate($data, $rules)
+    {
+        // $this->errors[] = 'The email is required.';
+    }
+
+    public function fails()
+    {
+        return !empty($this->errors);
+    }
+
+    public function getError()
+    {
+        return $this->errors;
+    }
+}
+
+$validator = new Validator;
+$validator->validate([''], ['required']);
+
+if ($validator->fails()) {
+    die('Fails'); // 
+}
+```
+12. In this case we don't care about setting errors outselves
+13. the getErrors give us more control on how we output the errors
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
