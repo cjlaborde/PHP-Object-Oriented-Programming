@@ -128,15 +128,179 @@ var_dump($user->avatar()); // 60
 ```
 9. When you are stuck with anything go ahead and use var_dump
 
+### Getters and setters
+1. OOP is much more than just syntax
+2. We will follow a concept here that follows good practice.
+3. We see we can set method and properties to our clases
+4. But how do we set properties and access them once they are set.
+5. How do we set and get properties?
+6. We will not set value to $email property
+7. Instead we will instantiate the class and set the property.
+```php
+class User
+{
+    public $email;
+}
+
+$user = new User;
+
+$user->email = 'alex@codecourse.com';
+
+var_dump($user);
+/*
 
 
+*/
+
+var_dump($user->email); // 'alex@codecourse.com'
+```
+8. This is fine and nothing wrong with it.
+9. But leave your class open to modifications that may cause unexpected results.
+10. When you writting code, lets say a class.
+11. Think how it works in terms of the developer who is going to be using it
+12. Essentially the goal is to create classes that are simple to use and are not Easily use in the wrong way.
+13. Write code that is easy to read, makes sense and works.
+14. Does setting and accessing a property like this makes sense?
+15. `$user->email = 'alex@codecourse.com';`
+16. Set sometimes we want to protect when we setting and getting values back
+17. That is were setters and getters come in
+18. They help create a nice and easy readable way to use a class.
+
+#### Create setter method
+1. We will create a method that allow us to set and get inside the User class
+2. setEmail
+3. $this represents the current object we working with
+```php
+
+class User
+{
+    public $email;
+
+    // method allow us to set email
+    public function setEmail($email)
+    {
+        // not going to work either since is still within the scope
+        // $email = $email;
+        // we can fix this with $this
+        var_dump($this);
+        /*
+            object(User)[2]
+            public 'email' => null
+        */
+        // $this->email = $email;
+    }
+}
+$user = new User;
+
+$user->setEmail('john@gmail.com');
+```
+4. Now we see is working correctly.
+
+```php
+class User
+{
+    public $email;
+
+    public function setEmail($email)
+    {
+        $this->email = $email;
+    }
+
+    public function getEmail()
+    {
+        //
+    }
+}
+
+$user = new User;
+
+$user->setEmail('john@gmail.com');
+
+var_dump($user);
+/*
+object(User)[2]
+  public 'email' => string 'john@gmail.com' (length=14)
+*/
+```
+5. Now use getter getEmail to get email
+```php
+class User
+{
+    public $email;
+
+    public function getEmail()
+    {
+        return $this->email;
+    }
+}
+
+$user = new User;
+
+$user->setEmail('john@gmail.com');
+# Both return the same
+echo $user->email; // john@gmail.com
+echo $user->getEmail(); // john@gmail.com
+```
+6. What is point of this if we can get email with $user->email?
+7. Having public property means we can set this value directly
+8. When we setting an email on this class and object
+9. We want to check if it a valid email
+10. This should be used in validation layer of your application
+11. But we will use this as an example to see how this works.
+12. Now that we have a method we have ability to do anything we like
+13. This can be anything like changing formatting the email or checking if it valid
+14. Now what happens when we call this method we check if it a valid email
+15. `$user->setEmail('john@gmail.com');`
+16. getEmail should give us back this value back if it valid
+```php
+
+class User
+{
+    public $email;
+
+    public function setEmail($email)
+    {
+        // Check if not valid
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        $this->email = $email;
+    }
+}
+
+$user = new User;
+
+// $user->setEmail('john@gmail.com');
+// echo $user->getEmail(); // john@gmail.com
 
 
+# invalid we get nothing
+$user->setEmail('johngmail.com');
+echo $user->getEmail(); //
+# we can check this using a var_dump
+var_dump($user);
+/*
+object(User)[2]
+  public 'email' => null
+*/
+```
+17. when you have property and doesn't have value it's value will be set to null.
+18. What if we want something to always happen when we getEmail
+19. in this case email will be set to lower case
+```php
+    public function getEmail()
+    {
+        return strtolower($this->email); // john@gmail.com
 
-
-
-
-
-
-
-
+    }
+    $user->setEmail('John@Gmail.com');
+```
+20. Lets say is critical we have lowercase and valid email
+21. We setting email directly and bypass the validation we set before
+22. That we we easy can bypass all the work we have done.
+```php
+$user->email = 'ererewrewDEFEFR';
+echo $user->email; // ererewrewDEFEFR
+```
+23. To deal with this we will dicuss Encapsulation in next lesson.
