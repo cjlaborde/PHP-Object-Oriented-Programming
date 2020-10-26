@@ -500,17 +500,295 @@ if ($validator->fails()) {
 13. the getErrors give us more control on how we output the errors
 
 
+### Inheritance
+1. The basic idea of inheritance is that when you create a class.
+2. Then you extend that class inheriting the methods and properties of that class
+3. Of course this depends on the visibility but we will be discussing this at the end of this part.
+4. We will work with example working with Model
+5. A model is a way to represent a noun base object within your application
+6. For example a User or forum Post
+7. Model usually a representation of data we get back from the database
+8. To create our base model naming it Model
+9. It will be the parent of any other model we want to create
+10. So the User model could contain things like username and email and Comment  Model simular information
+11. To get this working we extend our base model
+12. Both User & Comment are a model that extend the base Model class
+```php
+class Model
+{
+}
+
+class User extends Model
+{
+}
+
+class Comment extends Model
+{
+}
+```
+13. Now our base Model can have useful functionality that we want to share with both models without having to duplicate code
+14. Lets say our User and Comment models both have created and updated in our database
+15. This will just be a column and insert a timestamp for when each of these were created
+16. These would typically come from the database when we run a query
+```php
+class Model
+{
+}
+
+class User extends Model
+{
+    public $createdAt = '2016-01-01 12:30:00';
+}
+
+class Comment extends Model
+{
+    public $createdAt = '2016-01-01 12:30:00';
+}
+
+$user = new User;
+echo $user->createdAt; // 2016-01-01 12:30:00
+```
+17. What if we want any date from within any model that we created to be transform into a datetime object
+18. Date Time is a way to represent a Day and a time and be able to format it increment it and decrement it etc.
+19. <https://www.php.net/manual/en/class.datetime.php>
+20. What we could to is implement a method of each model and return a new dateTime instance with this date in
+21. We would have to do this with any Model that add the function getCreatedAt
+22. We see this quickly becomes messy
+```php
+class Model
+{
+}
+
+class User extends Model
+{
+    public $createdAt = '2016-01-01 12:30:00';
+
+    public function getCreatedAt()
+    {
+        return new DateTime($this->createdAt);
+    }
+}
+
+class Comment extends Model
+{
+    public $createdAt = '2016-01-01 12:30:00';
+    public function getCreatedAt()
+    {
+        return new DateTime($this->createdAt);
+    }
+}
+
+$user = new User;
+echo $user->createdAt; // 2016-01-01 12:30:00
+```
+23. But because we have our base model we can clean this.
+24. We Refer to this as // DRY = DON'T REPEAT YOURSELF
+```php
+class Model
+{
+    public $createdAt = '2016-01-01 12:30:00';
+    public function getCreatedAt()
+    {
+        return new DateTime($this->createdAt);
+    }
+}
+
+class User extends Model
+{
+}
+
+class Comment extends Model
+{
+}
+
+$user = new User;
+echo $user->createdAt; // 2016-01-01 12:30:00
+
+```
+
+#### Another example
+1. What we want to happen is that the is for a date time object to come back from the $createdAt value
+2. We want to do that in our base Model
+3. Because we want to assume any model we create are going to have a similar thing happened
+4. First we put a protected property called dates
+5. In User I want to identify which dates when I access them to I want them to be transformed
+6. Now we need to figure out a way how do we get back a date time class object
+7. since at the moment we just get back a string
+
+```php
+class Model
+{
+    protected $dates = [];
+}
+
+class User extends Model
+{
+    protected $dates = ['createdAt'];
+
+    public $createdAt = '2016-01-01 12:30:00'; // '2016-01-01 12:30:00'
+}
+
+$user = new User;
+
+var_dump($user->createdAt);
+
+```
+8. To do this we will use Magic Method
+9. Magic methods are methods that pre exist to do a expecific thing when you do an action with an object.
+10. What happens here is that when we try to access a property this __get() will be run
+11. Lets test the magic method out
+    
+```php
+class Model
+{
+    protected $dates = [];
+
+    public function __get($propery)
+    {
+        var_dump($this->dates);
+        die('Works'); // Works
+    }
+}
+
+class User extends Model
+{
+    protected $dates = ['createdAt'];
+
+    protected $createdAt = '2016-01-01 12:30:00'; \
+}
+
+$user = new User;
+
+var_dump($user->createdAt);
+
+```
+12. Now you wonder there is nothing in $dates = [] 
+13. What is going to happen is that because of __get() parent class here
+14. Is a parent of the User model
+15. It will pick up the dates we entered in User  protected $dates = ['createdAt'];
+```php
+class Model
+{
+    protected $dates = [];
+
+    public function __get($propery)
+    {
+        var_dump($this->dates);
+        die('Works');
+    }
+}
+
+class User extends Model
+{
+    protected $dates = ['createdAt'];
+
+    protected $createdAt = '2016-01-01 12:30:00'; // '2016-01-01 12:30:00'
+}
+
+$user = new User;
+
+var_dump($user->createdAt);
+/*
+array (size=1)
+  0 => string 'createdAt' (length=9)
+Works
+*/
+```
+16. As you see here we actually get that data value
+17. We going to use in_array to check if the property we trying to access is within this date
+18. If there is we return new DateTime with that property value
+19. and I am putting {$property} to show is not an actual direct property we want to access, is infact a variable
+20. Otherwise return property as it is, and do a default of returning the property
+21. Now what happens when we access this created update you see we get back an datetime object
+22. From this we can format it or use any of the other methods
+```php
+class Model
+{
+    protected $dates = [];
+
+    public function __get($propery)
+    {
+        if (in_array($propery, $this->dates)) {
+            return new DateTime($this->{$propery});
+        }
+        return $this->{$propery};
+    }
+}
+
+class User extends Model
+{
+    protected $dates = ['createdAt'];
+
+    protected $createdAt = '2016-01-01 12:30:00'; // '2016-01-01 12:30:00'
+}
+
+$user = new User;
+
+var_dump($user->createdAt);
+
+/*
+object(DateTime)[3]
+  public 'date' => string '2016-01-01 12:30:00.000000' (length=26)
+  public 'timezone_type' => int 3
+  public 'timezone' => string 'America/Puerto_Rico' (length=19)
+  */
+var_dump($user->createdAt->format('H:i')); // '12:30' 
+```
+23.  Allow you to create really powerful classes but keep the base class really clean
+24. We can do the same with Comments easily and we get same result
+```php
+class Comment extends Model
+{
+    protected $dates = ['createdAt'];
+
+    protected $createdAt = '2016-01-01 12:30:00'; // '2016-01-01 12:30:00'
+}
+
+$comment = new Comment;
+var_dump($comment->createdAt->format('H:i')); // '12:30'
+```
+25. Without having to duplicate code
+26. When ever you see extend keyword you know this model is a sub class or child class of a parent.
+27. If we don't know what is going on all we have to do is hunt down the parent class and see what happening
+28. Just know be careful that inheritance can get messy and become unmaintanable code
+29. Only create sub class if you think is necessary
+
+#### We look at encapsulation: private
+1. public: allow us to modify properties from anywhere
+2. protected: only allow us to access and modify this within the class but you can still acess it from subclasses you create
+3. private: can only be accessible only within the current class
+4. Now if we change $dates to private it will not work anymore
+```php
+
+class Model
+{
+    private $dates = [];
+
+    public function __get($propery)
+    {
+        if (in_array($propery, $this->dates)) {
+            return new DateTime($this->{$propery});
+        }
+        return $this->{$propery};
+    }
+}
+
+class Comment extends Model
+{
+    protected $dates = ['createdAt'];
+
+    protected $createdAt = '2016-01-01 12:30:00'; // '2016-01-01 12:30:00'
+}
 
 
+$user = new User;
+// var_dump($user->createdAt);
+// var_dump($user->createdAt->format('H:i'));
 
-
-
-
-
-
-
-
-
-
+$comment = new Comment;
+var_dump($comment->createdAt->format('H:i')); //  Call to a member function format() on string in
+```
+5. We use private when we don't want a property be accessible in sub classes.
+6. 
 
 
