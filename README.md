@@ -816,7 +816,7 @@ class User
 }
 ```
 3. Then to be able to use this class we use required
-```php
+```php 
 
 require 'Models/User.php';
 
@@ -828,3 +828,144 @@ echo $user->username; // billy
 5. So it will become messy when you need to access more than 1 class
 6. As well you will need to add new line of code everytime you create a new class
 7. To resolve this we use autoloading which we cover in next lesson
+
+### Autoloading PSR4 and Composer
+1. We will look in how to work with classes in real life
+2. PSR4 is a standard of autoloading class based on namespace
+3. Autoload = automatically allow us to load or record without manually having to like in the last part
+4. All we need to do with autoloading is create a class and we can use it.
+5. First we create file call App where all my application files are stored
+6. in App is where I will store all Models, Controllers and classes
+7. Then create Models/Task.php
+8. Then we create storage to store our classes
+9. Then create Storage/DatabaseTaskStorage.php
+10. Then create a TaskManager.php that uses the model Task.php we create a dark in Database 
+11. <https://www.php-fig.org/psr/psr-4/>
+12. A fully qualified class name has the following form:
+13.  \<NamespaceName>(\<SubNamespaceNames>)*\<ClassName>
+14.  NamespaceName = App
+15.  SubNamespaceNames = Models & Storage
+
+#### Composer
+1. Composer will handle all of this for you
+2. Essentially what it is, a dependency manager
+3. Aside of been able to pull other projects into your project
+4. We can easily set autoloading with composer
+5. `composer init`
+6. Create a componser.json
+7. Add autoload to composer.json
+8. Because we working with json this escape datas so we need another \\ Todo\\
+```php
+{
+    "autoload": {
+        "psr-4": {
+            "Todo\\": "app"
+        }
+    },
+    "name": "cjlaborde/phpoop",
+    "require": {}
+}
+```
+9. composer dump-autoload
+10. composer dump-autoload -o this is for optimizing for more files in a more complex project
+11. Now to use it on index.php write require 'vendor/autoload.php';
+12. Now we loading our classes based on our namespace
+13. One thing is missing, remember when we review psr4 auto-loading
+14.  We need to make sure we add namespace
+15.  Remember app now is represented by Todo
+```php
+// App == Todo we set it like this in composer.json
+namespace Todo\Models;
+
+class Task
+{
+}
+```
+16. We do the dame in DatabaseTaskStorage
+```php
+namespace Todo\Storage;
+
+class DatabaseTaskStorage
+{
+}
+```
+17. What happens when is not inside a directory?
+18. like TaskManager in this case we just write Todo only
+```php
+
+namespace Todo;
+
+class TaskManager
+{
+}
+```
+
+19. In index we try to add new Task but we get error.
+```php
+require 'vendor/autoload.php';
+
+$task = new Task;
+// Fatal error: Uncaught Error: Class 'Task' not found in
+```
+20. Now since Task doesn't tecnically exist has a namespace instead
+21.  What we have to do is
+```php
+$task = new \Todo\Models\Task;
+```
+22. We can prove that by doing a var_dump
+```php
+var_dump($task);
+/*
+object(Todo\Models\Task)[4]
+*/
+
+```
+23.  We can use "use" to make it cleaner
+```php
+use Todo\Models\Task;
+
+require 'vendor/autoload.php';
+
+$task = new Task;
+```
+24. If you want to call Task something else you can use "as"
+```php
+use Todo\Models\Task as TaskModel;
+
+require 'vendor/autoload.php';
+
+$task = new TaskModel;
+```
+25. Why we need to do all of this?
+26. Lets say we create a new Model called User.php that can be the user allowed to create Tasks
+```php
+namespace Todo\Models;
+
+class User
+{
+}
+```
+27. Now we don't need to do anything else anymore.
+28. We just write the code we need.
+29. If we need to pull other Models into here we use "use" to create new instance.
+30. Now in index all we need to do is pull `use Todo\Models\User;`
+31. Then create new class `$user = new User;`
+32. No autoloading anything in, no need to manually do it.
+33. and now we have a user model.
+```php
+use Todo\Models\Task;
+use Todo\Models\User;
+
+require 'vendor/autoload.php';
+
+$task = new Task;
+$user = new User;
+
+var_dump($user);
+/*
+object(Todo\Models\Task)[4]
+*/
+```
+34. Is good idea to have this setup for every project.
+35. Since this is standard now in modern php development you have to be using composer to create a maintanable project.
+36. 

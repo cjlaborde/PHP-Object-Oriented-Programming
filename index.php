@@ -15,6 +15,7 @@
         <li><a href="/4-encapsulation">Encapsulation</a></li>
         <li><a href="/5-inheritance">Inheritance</a></li>
         <li><a href="/6-class-files">Class files</a></li>
+        <li><a href="/7-autoloading-psr4-and-composer">Autoloading PSR4 and Composer</a></li>
     </ul>
 </body>
 
