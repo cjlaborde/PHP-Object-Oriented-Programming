@@ -789,6 +789,42 @@ $comment = new Comment;
 var_dump($comment->createdAt->format('H:i')); //  Call to a member function format() on string in
 ```
 5. We use private when we don't want a property be accessible in sub classes.
-6. 
 
 
+### Class Files
+1. Up till now we been creating and using classes in just 1 file
+2. But in real project you not going to create all classes in just 1 file
+3. Reason for this is OOP is about good design and structure.
+4. Generally what we do is create a new class of every class
+5. we create a file for User.php
+6. We only add a class once
+7. this is convention and we always use Uppercase when naming class
+8. Also always give the file name as your class
+```php
+class User
+{
+}
+```
+
+#### Directory structure
+1. Generally we structure classes into directories
+2. For example we could have a Model directory and put User.class inside
+```php
+class User
+{
+    public $username = 'billy';
+}
+```
+3. Then to be able to use this class we use required
+```php
+
+require 'Models/User.php';
+
+$user = new User;
+
+echo $user->username; // billy
+```
+4. Now the problem is that we may need to use too many requires
+5. So it will become messy when you need to access more than 1 class
+6. As well you will need to add new line of code everytime you create a new class
+7. To resolve this we use autoloading which we cover in next lesson

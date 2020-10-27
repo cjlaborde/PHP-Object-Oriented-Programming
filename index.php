@@ -14,6 +14,7 @@
         <li><a href="/3-getters-and-setters">Getters and setters</a></li>
         <li><a href="/4-encapsulation">Encapsulation</a></li>
         <li><a href="/5-inheritance">Inheritance</a></li>
+        <li><a href="/6-class-files">Class files</a></li>
     </ul>
 </body>
 
