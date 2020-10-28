@@ -968,4 +968,231 @@ object(Todo\Models\Task)[4]
 ```
 34. Is good idea to have this setup for every project.
 35. Since this is standard now in modern php development you have to be using composer to create a maintanable project.
-36. 
+
+
+### Interfaces
+1. OOP is less about syntax and more about good design
+2. We going to introduce interfaces abstract class.
+3. Understanding interfaces actual classes can be confusing at first.
+4. Interfaces probably more complicated to understand
+5. Lets create a DatabaseTaskStorage class
+6. It can contain methods like get to retreive tasks from database
+7. then a method to store a task and take a task in
+8. We can go ahead and use this class anywhere in our application to store
+```php
+class DatabaseTaskStorage
+{
+    public function get($id)
+    {
+        // mysql implementation
+
+    }
+
+    public function store(Task $task)
+    {
+        // mysql implementation
+
+    }
+}
+```
+9. and you might not see immediately see a problem with this.
+10. But by using this class what we are actually doing is tying ourself down
+11. To an exact implementation
+12. What happens if we want to move to storing tasks to another database type.
+13. Or we want to store tasks between files or session or cookies
+14. Now what we want to do when we creating tasks
+15. Especially this task storage class
+16. Is think how this would look from any implementation
+17. The idea here is implement specific implementation that have generic contrast
+18. For the kind of methods you want to see specifically the task store.
+19. Now lets go create our inferface and see how it looks and use it
+20. Before I think of creating my specific DatabaseTaskStorage class
+21. I want to think about my Interface, we call it TaskStorageInterface
+22. Notice we not calling it DatabaseTaskStorageInterface
+23. since all we are doing here is that this is going to be a generic contract that define out the methods
+24. That we want to see for any kind of database
+25. We would do this before we even begin to create our class
+26. Then we add what kind of method we would like to see
+27. This help you design your application before you start writing any classes
+28. Notice that we are not defining the block {} since this is not an actual implementation
+
+```php
+// We refer to this as interfece for a contract
+interface TaskStorageInterface
+{
+    public function get($id);
+    public function store(Task $task);
+}
+
+// We refer to this as a concrete implementation
+class DatabaseTaskStorage
+{
+    public function get($id)
+    {
+        // mysql implementation
+
+    }
+
+    public function store(Task $task)
+    {
+        // mysql implementation
+
+    }
+}
+```
+29. All this is saying is that when you implement an interface you have to define the methods we give in the Interface or it will give an error
+
+```php
+class Task
+{
+}
+
+interface TaskStorageInterface
+{
+    public function get($id);
+    public function store(Task $task);
+}
+
+class MySqlDatabaseTaskStorage implements TaskStorageInterface
+{
+    public function get($id)
+    {
+        // mysql implementation
+
+    }
+
+    public function store(Task $task)
+    {
+        // mysql implementation
+
+    }
+}
+
+$storage = new MySqlDatabaseTaskStorage;
+//  Class MySqlDatabaseTaskStorage contains 2 abstract methods and must therefore be declared 
+// abstract or implement the remaining methods (TaskStorageInterface::get, TaskStorageInterface::store)
+```
+30. Because we have not implemented 2 methods that we find in our interface
+31. So we remove comment from get() and store() and it will work again
+32. What is the point of using interface if it works without it
+33. What happens when you want to switch from mysql to storing these within a file?
+34. You would use get and store throught your application
+35. So you need to know when you create new class to handle class storage
+36. What we don't want to do is updating this class
+37. We don't want to change this MySqlDatabaseTaskStorage at all
+38. This is one of the SOLID principals
+39. The class should be open for extension and close from modifications
+40. We don't want to modify this at all
+41. Therefore what we do is implement a new implementation
+```php
+class Task
+{
+}
+
+interface TaskStorageInterface
+{
+    public function get($id);
+    public function store(Task $task);
+}
+
+class FileTaskStorage implements TaskStorageInterface
+{
+    public function get($id)
+    {
+        // mysql implementation
+
+    }
+
+    public function store(Task $task)
+    {
+        // mysql implementation
+
+    }
+}
+
+class MySqlDatabaseTaskStorage implements TaskStorageInterface
+{
+    public function get($id)
+    {
+        // mysql implementation
+
+    }
+
+    public function store(Task $task)
+    {
+        // mysql implementation
+
+    }
+}
+
+$storage = new FileTaskStorage;
+//  Class MySqlDatabaseTaskStorage contains 2 abstract methods and must therefore be declared 
+// abstract or implement the remaining methods (TaskStorageInterface::get, TaskStorageInterface::store)
+```
+42. Now we can switch to file by changing `$storage = new FileTaskStorage;`
+43. This will work through our application since we know we will use our store and get method
+44. Think of this from the point of the developer
+45. All we need to do is switch out a class and we are done
+46. Is the developer point of view we want to think about we don't want to break things when we swith to a new type of story
+47. The main question you want to ask yourself will this implementation change when you are building a class.
+48. If so you want to implement a interface
+49. Create the methods you have seen as part of that implementation
+50. Then you can go ahead and build your concrete implementation
+51. You can create any of the methods you need and no need to just create the methods added to interface as we do here with `private function buildQuery()`
+```php
+interface TaskStorageInterface
+{
+    public function get($id);
+    public function store(Task $task);
+}
+
+class FileTaskStorage implements TaskStorageInterface
+{
+    public function get($id)
+    {
+        // file implementation
+
+    }
+
+    public function store(Task $task)
+    {
+        // file implementation
+
+    }
+}
+
+class MySqlDatabaseTaskStorage implements TaskStorageInterface
+{
+    public function get($id)
+    {
+        // mysql implementation
+
+    }
+
+    public function store(Task $task)
+    {
+        // mysql implementation
+
+    }
+
+    private function buildQuery()
+    {
+    }
+}
+
+$storage = new MySqlDatabaseTaskStorage;
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
