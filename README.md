@@ -1373,9 +1373,406 @@ class GoogleService extends Service
 20. Thinking by a developer point of view makes a lot of sense.
 21. Is about building solid clean code that we can't easily mess up.
 
+### Typehinting
+1. Typehinting makes it easier to create clean and easier to read code
+2. As well protect against problems later down the line
+3. Typehinting is checking a type of a variable or object before the code in your method is run.
+4. Simple example, if you were expecting an array to be past into a method maybe you are itterating over it.
+5. Lets say you have a Calculator class
+6. and you want to implement methods like add and substract
+7. You want multiple integers or floats to be pass into these methods
+8. To start with we would have some kind of $total property
+9. Then an add() method with array of values then do a foreach to update total
+10. then we have total method that just grabs the total
+11. then initiate it to use it new Calculator;
+```php
+
+class Caculator
+{
+    protected $total = 0;
+
+    public function add($values)
+    {
+        foreach ($values as $value) {
+            $this->total += $value;
+        }
+    }
+
+    public function total()
+    {
+        return $this->total;
+    }
+}
+
+$calculator = new Caculator;
+$calculator->add([2, 4, 6]); // 12
+
+echo $calculator->total();
+```
+12. How do they know if they can't see the class what they are passing in here
+13. Lets pass 2 and see what happens `$calculator->add(2);`
+14. We get error
+15. That is caused by the foreach
+```php
+
+class Caculator
+{
+    protected $total = 0;
+
+    public function add($values)
+    {
+        foreach ($values as $value) {
+            $this->total += $value;
+        }
+    }
+
+    public function total()
+    {
+        return $this->total;
+    }
+}
+
+$calculator = new Caculator;
+// $calculator->add([2, 4, 6]); // 12
+$calculator->add(2); //  Warning: Invalid argument supplied for foreach()
+
+echo $calculator->total();
+```
+14. This is not good enough
+15. We should be saying who ever using this
+16. You need to pass an array here because the function requires iterating through values
+17. How can we do this? We could create if statement
+```php
+class Caculator
+{
+    protected $total = 0;
+
+    public function add($values)
+    {
+        if (!is_array($values)) {
+            return; // or show error here
+        };
+
+        foreach ($values as $value) {
+            $this->total += $value;
+        }
+    }
+
+    public function total()
+    {
+        return $this->total;
+    }
+}
+
+$calculator = new Caculator;
+$calculator->add(2); // 0
+
+echo $calculator->total();
+```
+18. Now it works, but is this really useful?
+19. The developer using this how they think they going to get this to work?
+20. They may try to add it multiple times and still not know what is going on.
+```php
+$calculator->add(2); // 0
+$calculator->add(2); // 0
+$calculator->add(2); // 0
+```
+21. So lets get rid of the if statement and use tpyehinting
+#### Using Typehinting
+1. Before the value `add(array $values)` you want to pass into any method we type in the type
+```php
+
+class Caculator
+{
+    protected $total = 0;
+
+    public function add(array $values)
+    {
+        foreach ($values as $value) {
+            $this->total += $value;
+        }
+    }
+
+    public function total()
+    {
+        return $this->total;
+    }
+}
+
+$calculator = new Caculator;
+
+$calculator->add(2); // TypeError: Argument 1 passed to Caculator::add() must be of the type array, int given
+```
+2. Now the other developer will know it requires an array of values and they can fix it
+3. That is the benefit of typehinting
+4. You can also use int.
+5. Now you have cleaner method method the need of an if statement to show the other programmer the error
+6. We can typehint classes and interfaces too which is great.
+
+#### Shopping cart example
+1. Here we create a Cart class with Item class
+```php
+class Item
+{
+    protected $cost = 0;
 
 
+    public function setCost(float $cost)
+    {
+        $this->cost = $cost;
+    }
+
+    public function getCost()
+    {
+        return $this->cost;
+    }
+}
+ 
+class Cart
+{
+    protected $items = [];
+
+    public function add($item)
+    {
+        $this->items[] = $item;
+    }
+
+    public function total()
+    {
+        return 0;
+    }
+}
+
+$item1 = new Item;
+$item1->setCost(5);
+
+$item2 = new Item;
+$item2->setCost(20.50);
+
+$cart = new Cart;
+
+$cart->add($item1);
+$cart->add($item2);
+
+var_dump($cart);
+
+/*
+object(Cart)[4]
+  protected 'items' => 
+    array (size=2)
+      0 => 
+        object(Item)[2]
+          protected 'cost' => float 5
+      1 => 
+        object(Item)[3]
+          protected 'cost' => float 20.5
+*/
+
+```
+2. Set the total method
+```php
+
+class Cart
+{
+    protected $items = [];
+
+    public function add($item)
+    {
+        $this->items[] = $item;
+    }
+
+    public function total()
+    {
+        // return 0;
+        $total = 0;
+
+        foreach ($this->items as $item) {
+            $total += $item->getCost();
+        }
+
+        return $total;
+    }
+}
+
+$item1 = new Item;
+$item1->setCost(5);
+
+$item2 = new Item;
+$item2->setCost(20.50);
+
+$cart = new Cart;
+
+$cart->add($item1);
+$cart->add($item1);
+
+// var_dump($cart);
+
+echo $cart->total(); // 25.5
+```
+
+3. What happens then if we pass anything on our cart
+4. The point here is when we get the total we getting the getCost() method
+5. That is important because not every object in our application is going to have a getCost method
+6. What we could here is pass the cart $cart = new Cart; into $cart->add($cart);
+7. What would happen is that we would get error.
+8. Can't find getCost since it doesn't exist in Cart but does in Item class.
+```php
+$cart->add($cart);
+// Fatal error: Uncaught Error: Call to undefined method Cart::getCost() 
+```
+9. The point here is how do we use type hinting
+10. We do it at the point were we add items to our cart.
+
+#### Type Hinting by model name function add(Item $item)
+1. We add typehinting to add function
+```php
+    public function add(Item $item)
+    {
+        $this->items[] = $item;
+    }
+```
+2. A developer looking at this methods knows exactly what needs to be passed in
+3. Type makes your code more redeable
+```php
+class Item
+{
+    protected $cost = 0;
 
 
+    public function setCost(float $cost)
+    {
+        $this->cost = $cost;
+    }
+
+    public function getCost()
+    {
+        return $this->cost;
+    }
+}
+
+class Cart
+{
+    protected $items = [];
+
+    // public function add($item)
+    public function add(Item $item)
+    {
+        $this->items[] = $item;
+    }
+
+    public function total()
+    {
+        // return 0;
+        $total = 0;
+
+        foreach ($this->items as $item) {
+            $total += $item->getCost();
+        }
+
+        return $total; // 25.5
+    }
+}
+
+$item1 = new Item;
+$item1->setCost(5);
+
+$item2 = new Item;
+$item2->setCost(20.50);
+
+$cart = new Cart;
+
+$cart->add($item1);
+
+// : Uncaught TypeError: Argument 1 passed to Cart::add() must be an instance of Item, instance of Cart given
+```
+4. It makes a lot more sense now and is more readable
+5. What we trying to do here is bullet proof our code and make sure is completely clear what it does.
+6. Also in greatly improve readability
+
+#### type hinting interfaces
+1. Lets say we have interface for our items
+```php
+interface ItemInterface
+{
+    public function setCost(float $cost);
+    public function getCost();
+}
+
+class Item implements ItemInterface
+{
+```
+2. What we can do now is change Item to ItemInterface
+```php
+
+interface ItemInterface
+{
+    public function setCost(float $cost);
+    public function getCost();
+}
+
+class Item implements ItemInterface
+{
+    protected $cost = 0;
 
 
+    public function setCost(float $cost)
+    {
+        $this->cost = $cost;
+    }
+
+    public function getCost()
+    {
+        return $this->cost;
+    }
+}
+
+class Cart
+{
+    protected $items = [];
+    # What we can do is change Item to ItemInterface
+    # We do this since we know when we implement interface it has to have that particular method
+    # it assume that it will have the getCost method
+    # If you are passing something into a method
+    # That potentially have different concrete implementation
+    # always type by the interface and not by the implementation
+    public function add(ItemInterface $item)
+    {
+        $this->items[] = $item;
+    }
+
+    public function total()
+    {
+        // return 0;
+        $total = 0;
+
+        foreach ($this->items as $item) {
+            $total += $item->getCost();
+        }
+
+        return $total; // 25.5
+    }
+}
+
+$item1 = new Item;
+$item1->setCost(5);
+
+$item2 = new Item;
+$item2->setCost(20.50);
+
+$cart = new Cart;
+
+$cart->add($item1);
+
+$cart->add($item2);
+
+echo $cart->total();
+```
+3. In this case would not be as useful
+4. but when you see this ` add(ItemInterface $item)`
+5. It means we are expecting some kind of item to be pass in that has an specific method
+6. Since we know interface is define top say that the concrete implementation must have that method
+7. You will come into contact with this often when you working with other people code or when you building projects
+8. Personally typehint everything, I can just to make it clear what should be accepted into a method
+9. It also give us as you seen protection knowing what is inside of that object.
+10. What kind of method we call on it
+11. Just tidy up and bullet proof our code
