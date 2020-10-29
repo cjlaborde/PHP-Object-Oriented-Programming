@@ -1182,13 +1182,196 @@ class MySqlDatabaseTaskStorage implements TaskStorageInterface
 
 $storage = new MySqlDatabaseTaskStorage;
 ```
+### Abstract methods
+1. Abstract classes similar to interfaces in 1 way.
+2. We will discuss how they are similar and different to interfeces
+3. Lets say we building social media authentication class
+4. With a Service to be able to authenticate
+```php
+
+class Service
+{
+    // 
+}
+
+class FacebookService extends Service
+{
+    // 
+}
+
+$facebook = new FacebookService;
+$facebook->getRedirectUri();
+```
+5. What we would never do is
+```php
+$facebook = new Service;
+$facebook->getRedirectUri();
+```
+6. There is no point in intiatiating the server
+7. We want to make it so Service class can't be intiatiated.
+```php
+class Service
+{
+    // 
+}
+
+class FacebookService extends Service
+{
+    // 
+}
+
+$service = new Service;
+```
+8. We can now and it will not show error, but that should not happen
+9.  To resolve this we need to add abstract to Service class
+```php
+class Service
+{
+    // 
+}
+
+class FacebookService extends Service
+{
+    // 
+}
+
+$service = new Service; //  Uncaught Error: Cannot instantiate abstract class Service in
+```
+10. Not useful to us but again thinking in terms of the developer that will use this class.
+11. You want them to know they should create FacebookService instead
+12. We have more benefit to an abstract class method
+
+#### How Abstract classes can be similar to interfeces
+1. We can do a similar thing by calling something called abstract method
+2. This will mean any child class we create, will have to implement the abstract method defined in the base class.
+3. `$facebook->getRedirectUri();` What this will do is generate the specific service uri that we redirect to the user to say yes I accept
+```php
+abstract class Service
+{
+    // 
+}
+
+class FacebookService extends Service
+{
+    public function getRedirectUri()
+    {
+        return 'uri';
+    }
+}
+
+$facebook = new FacebookService;
+$facebook->getRedirectUri();
+```
+4. You can easily add more services with extends Service
+```php
+abstract class Service
+{
+    // 
+}
+
+class FacebookService extends Service
+{
+    public function getRedirectUri()
+    {
+        return 'uri';
+    }
+}
+
+class TwitterService extends Service
+{
+    public function getRedirectUri()
+    {
+        return 'uri';
+    }
+}
+```
+5. We might extend Service again but not include the getRedirectUri() method
+6. These are all concrete implementations that we expect to have the same functionality
+7. How ever we donn't in this case that is why we get error message
+
+```php
+abstract class Service
+{
+    // 
+}
+
+class FacebookService extends Service
+{
+    public function getRedirectUri()
+    {
+        return 'uri';
+    }
+}
+
+class TwitterService extends Service
+{
+    public function getRedirectUri()
+    {
+        return 'uri';
+    }
+}
+class GoogleService extends Service
+{
+    //
+}
+
+$google = new GoogleService;
+echo $google->getRedirectUri(); // Fatal error: Uncaught Error: Call to undefined method GoogleService::getRedirectUri() 
+```
+8. How do we enforce this without using interface?
+9. Sometimes is better to not use interfaces.
+10. There is nothing wrong with using interface.
+11. `class FacebookService extends Service implements SocialServiceInterface`
+12. We could do that ^ but is a lot cleaner and a lot easier to now create an abstract method.
+13. Lets implement an abstract method just as we did before we don't give it a block {}
+```php
+abstract class Service
+{
+    
+    abstract function getRedirectUri();
+}
+```
+14. We can also set visiblity `abstract public function getRedirectUri();`
+15. Now when we try to intiantiate google service we get error
+```php
+abstract class Service
+{
+    // oauth method
 
 
+    abstract public function getRedirectUri();
+}
+
+class GoogleService extends Service
+{
+    //
+}
+
+// Fatal error: Class GoogleService contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (Service::getRedirectUri) 
+```
+16. Now when someone tries to extend the service class now they see they need to create the getRedirectUri(); for it to work.
+17. Now it works correctly.
+```php
+abstract class Service
+{
+    // oauth method
 
 
+    abstract public function getRedirectUri();
+}
 
-
-
+class GoogleService extends Service
+{
+    public function getRedirectUri()
+    {
+        return 'uri'; // uri
+    }
+}
+```
+18. This will usually appear when you working with other people code.
+19. The main thing is spend sometime yourself thinking about the side of your code and how is going to be used.
+20. Thinking by a developer point of view makes a lot of sense.
+21. Is about building solid clean code that we can't easily mess up.
 
 
 

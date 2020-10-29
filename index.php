@@ -17,6 +17,7 @@
         <li><a href="/6-class-files">Class files</a></li>
         <li><a href="/7-autoloading-psr4-and-composer">Autoloading PSR4 and Composer</a></li>
         <li><a href="/8-interfaces">Interfaces</a></li>
+        <li><a href="/9-abstract-methods">Abstract methods</a></li>
     </ul>
 </body>
 
