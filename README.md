@@ -1776,3 +1776,160 @@ echo $cart->total();
 9. It also give us as you seen protection knowing what is inside of that object.
 10. What kind of method we call on it
 11. Just tidy up and bullet proof our code
+
+### Static properties and methods
+1. If you used OOP you probably came across static methods and static properties.
+2. Here is an example of a static property we are accessing.
+```php
+User::$username;
+```
+3. We come accross of a static Method
+```php
+User::create()
+```
+4. You have seen these in frameworks like laravel.
+5. We will talk about what these actually are
+6. Before we have started is very important to say.
+7. That you should stay away from using static unless you have a very good reason to and makes things more convenient.
+8. Static methods and static properties have the potential to create really difficult code to work with.
+9. Also is very difficult to test.
+10. Lets look at static methods and properties and see how we interact with them.
+11. First important to realize what static property actually is
+#### Static Property
+1. To create static method add keyword static in front
+```php
+class User
+{
+    protected static $username;
+}
+```
+2. Here is an example using static property
+```php
+class User
+{
+    public static $username;
+}
+
+$user = new User;
+
+$user::$username = 'john';
+
+echo $user::$username; // john
+```
+2. What is the point of doing this?
+3. What exactly is static property?
+4. Lets create new User to see what it does.
+5. The whole point here is that $username doesn't belong to the user class or user object
+6. Is just a global variable floating around
+7. This is the kind of problem we get when we start using static
+```php
+class User
+{
+    public static $username;
+}
+
+$user1 = new User;
+$user1::$username = 'john';
+
+$user2 = new User;
+$user2::$username = 'joe';
+
+echo $user2::$username; // joe
+echo $user1::$username; // joe
+```
+8. Why would we use a static property/method?
+9. If you have a very simple one use functionality that would benefit from using a static method then this makes sense.
+
+#### Validation example using static
+1. Lets say we using validation for your application.
+2. All this is doing is taking what is in the form via $request
+3. Then checking if username is there
+4. As well check if email is there and is a valid email address
+```php
+$validator->validate($request, [
+    'username' => 'required',
+    'email' => 'required|email',
+]);
+```
+5. Maybe this is on a controller
+6. This will be in your code
+7. Lets say you want to extract your rules away to a new file
+8. To make it easier to update
+9. As well make them easier to share when you want to validate elsewhere
+10. Where you can use them for login or registration
+```php
+$validator->validate($request, [
+    'username' => 'required',
+    'email' => 'required|email',
+    'password' => 'required',
+]);
+```
+11. These the validation rule for signup
+12. We often call these SignUpForm
+13. This would be perfect place to use static
+14. Now we have the ability to create SignUpForm without creating a new intance
+15. Now if we wanted to use this validation somewhere else in our application
+16. We update in one place and both validator below will pick up these roles changes
+17. Here is where you would use static since it just makes sense
+```php
+
+class SignUpForm
+{
+    public static $rules = [
+        'username' => 'required',
+        'email'    => 'required|email',
+        'password' => 'required|min:5'
+    ];
+    // YUSMG1GSMCGD25QM
+}
+
+$validator->validate($request, SignUpForm::$rules);
+
+// Admin 
+$validator->validate($request, SignUpForm::$rules);
+```
+18. There more examples where you might use static but as you come accross these in real world you will be able to understand where exactly they are.
+
+#### Static method vs Facades in Laravel
+1. Might confuse you when you start working with framework like Laravel
+2. Now essentially within laravel
+3. User would be our model 
+4. create() method would create a record in the database with these details
+5. We have spoken at how how we should not use static
+6. Laravel calls User:: facade
+7. What happening here behing the scene is that we not calling a static method
+8. What we are doing is calling user model or user class already been instantiated
+9. We are hiding the methods it has behind the static
+10. For the sole purpose of mekind it easier to develop
+```php
+$user = new User;
+
+User::create([
+    'username' => 'alex',
+    'email' => 'alex@codecourse.com',
+]);
+```
+11. Both of these are exactly the same
+```php
+# Both are the same
+$user = new User;
+$user->username = 'alex';
+$user->email = 'alex@codecourse.com';
+$user->save(); // save in the db
+
+# Both are the same
+# hidden behind a static
+# is not actually a static method that we are calling
+# is calling this which is calling an instantiated version of above ^
+User::create([
+    'username' => 'alex',
+    'email' => 'alex@codecourse.com',
+]);
+```
+12. Is called Facace and you will see it as well when you are calling a route
+13. and you are running something when you hit that particular url
+```php
+Route::get('/', function () {
+});
+```
+14. Just be safe and don't use static unless you find a really good reason to use it.
