@@ -20,6 +20,7 @@
         <li><a href="/9-abstract-methods">Abstract methods</a></li>
         <li><a href="/10-typehinting">Typehinting</a></li>
         <li><a href="/11-static-properties-and-methods">Static properties and methods</a></li>
+        <li><a href="/12-traits">Traits</a></li>
     </ul>
 </body>
 

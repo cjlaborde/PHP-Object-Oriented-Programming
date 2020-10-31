@@ -1933,3 +1933,196 @@ Route::get('/', function () {
 });
 ```
 14. Just be safe and don't use static unless you find a really good reason to use it.
+
+### Traits
+1. We saw earlier in the part about inheritance when we looked at the model example
+2. That we can share functionality between 2 subclasses when we extend a parent class
+3. If we have method on the parent class
+4. This is not always a reason to use parent class
+5. Remember that extended classes can be abused
+6. You often seen parent classes been abused just for the sake of sharing methods
+7. That often is not a good idea.
+8. What is our other option?
+9. Of course we want to keep our code nice, clean and reusable.
+10. To get around this we use traits
+11. traits are simply a way to share methods with classes
+12. These are highly reusable and very simple to pull them into another class
+13. traits can be abused too
+14. We will look into a way where we can include these in so they make sense
+15. Here is an example of using a traits
+16. Lets say we want to include a functionaliryt in both User and Admin class so we can use a trait for this
+```php
+trait Authenticatable
+{
+    // Here we type methods
+}
+
+class User
+{
+    # To use traits
+    use Authenticatable;
+}
+// Then wen we initiate User we will have access to Authenticatable methods
+
+class Admin
+{
+}
+```
+#### Using Trait real life example
+1. what happens if we have another class that extend from base model
+2. For example Admin class
+```php
+
+interface AuthenticatableInterface
+{
+    public function getPassword();
+    public function setPassword($password);
+}
+
+class User implements AuthenticatableInterface
+{
+    public function getPassword()
+    {
+        //
+    }
+
+    public function setPassword($password)
+    {
+        //
+    }
+}
+
+class Admin implements AuthenticatableInterface
+{
+    public function getPassword()
+    {
+        //
+    }
+
+    public function setPassword($password)
+    {
+        //
+    }
+}
+
+```
+3. Hopefully you can see the problem we have here, we are repeating 2 methods setPassword and getPassword
+4. Perhaps there another table with same password or column
+5. But we are duplication methods this is not a good idea
+6. So along comes a trait that allows us to share these 2 methods.
+7. Important to know these 2 most do the same thing
+8. Must grab same column otherwise, or implementation between 2 classes would break.
+9. Lets use a trait to resolve this issue
+10. Just create a trait and put the methods that you will resue in it
+11. Then inside the classes when you want to access the traits you just use `use Authenticatable;`
+12. As you see this is more cleaner than above example with repetable code
+13. You can also have your traits stored in a different file
+```php
+
+interface AuthenticatableInterface
+{
+    public function getPassword();
+    public function setPassword($password);
+}
+
+trait Authenticatable
+{
+    public function getPassword()
+    {
+        //
+    }
+
+    public function setPassword($password)
+    {
+        //
+    }
+}
+
+class User implements AuthenticatableInterface
+{
+    use Authenticatable;
+}
+
+class Admin implements AuthenticatableInterface
+{
+    use Authenticatable;
+}
+```
+
+#### How Laravel use traits
+1. In the App/User we are calling a trait use illuminate\Foundation\Auth\User as Authenticable;
+2. You will notice that some methods use Multiple traits this is to keep code even more organized and clean
+
+#### In our last example we use traits within traits
+1. This can be useful but can get a little more complicated
+2. Here we will create an example
+```php
+
+trait HelloWorld
+{
+    public function sayHelloWorld()
+    {
+        return 'Hello world';
+    }
+}
+
+class Greeting
+{
+    use HelloWorld;
+
+    public function output()
+    {
+        return $this->sayHelloWorld();
+    }
+}
+
+$greeting = new Greeting;
+echo $greeting->output(); // Hello world
+```
+3. Now what would happen if in our application we need to output Hello or World on their on?
+4. What we can do is create another trait for this
+5. Here you can see how we can break our application into pieces to smoothly put it together when we need to.
+6. Now we can use either Hello or World on their own.
+```php
+trait Hello
+{
+    public function sayHello()
+    {
+        return 'Hello';
+    }
+}
+
+trait World
+{
+    public function sayWorld()
+    {
+        return 'world';
+    }
+}
+
+
+trait HelloWorld
+{
+    # how we use multiple traits
+    use Hello, World;
+    public function sayHelloWorld()
+    {
+        return $this->sayHello() . ' ' . $this->sayWorld();
+    }
+}
+
+class Greeting
+{
+    use HelloWorld;
+
+    public function output()
+    {
+        return $this->sayHelloWorld();
+    }
+}
+
+$greeting = new Greeting;
+echo $greeting->output();
+```
+7. You may not see these too often but they are useful as you have seen
+8. When you want to DRY your code and reuse basic functionality as we saw in these examples
