@@ -2126,3 +2126,317 @@ echo $greeting->output();
 ```
 7. You may not see these too often but they are useful as you have seen
 8. When you want to DRY your code and reuse basic functionality as we saw in these examples
+
+### Exceptions
+1. Exception are a great way to control the flow of what you are building
+2. By basically saying wait something has gone wrong within a class
+3. This allow you to catch if something go wrong it a block {}
+4. and you can change the flow of your application accordingly
+5. The reason this is more cleaner is because the alternative is to use if statements and generally make your classes more messy
+6. Now we will show example where we might throw an exception in a class
+7. Checking using if statement instead of using Exception
+8. This is find but we have not allowed to show information of what actually has gone wrong here
+9. Something else could happen within here `if (!$gateway->charge('123', 25.00)) `
+10. For example the token we pas through may not be right
+```php
+class PaymentGateway
+{
+    # payment method token
+    # usually when you work with payment providers and user enter their card details
+    # The card information will be translated into a token that we can store and
+    # used to charge user.
+    public function charge($token, $amount)
+    {
+        $payment = $this->service->charge($token, $amount);
+
+        if (!$payment->success) {
+            return false;
+        }
+    }
+}
+
+$gateway = new PaymentGateway;
+
+### Checking using if statement instead of using Exception
+if (!$gateway->charge('123', 25.00)) {
+    die('Payment failed');
+}
+
+```
+11. How do we know what have gone wrong here
+12. That is where Eceptions come in
+13. We can make it as explicit as we like
+14. lets look at throwing a basic exception
+15. all we do is use trow new Exeption.
+16. Exception is a class we can instiantiate
+17. <https://www.php.net/manual/en/language.exceptions.php>
+18. What is happening is we throwing an exception but is 
+19. Uncaught: we have not caught the exception
+```php
+class PaymentGateway
+{
+    public function charge($token, $amount)
+    {
+        if (1) {
+            throw new Exception; //Uncaught Exception
+        }
+    }
+}
+
+$gateway = new PaymentGateway;
+
+### Checking using if statement instead of using Exception
+if (!$gateway->charge('123', 25.00)) {
+    die('Payment failed');
+}
+```
+20. What we can also do is when it throw exception we can pass in a message
+```php
+        if (1) {
+            throw new Exception('Payment failed'); // Fatal error: Uncaught Exception: Payment failed
+        }
+```
+21. How do we catch the Fatal record and control the flow of our application
+#### try and catch
+1. When you want to do this you create your try catch block
+2. Get caught the exception and controlling flow of the application
+3. in the catch you can redirect user or flash error message if it fails
+```php
+$gateway = new PaymentGateway;
+
+try {
+    $gateway->charge('123', 25.00);
+} catch (Exception $e) {
+    // redirect user
+    // flash error message
+    die('Payment failed'); // Payment failed
+}
+```
+3. What is the difference compared with an if statment?
+4. The different is you can write other code in the try block
+5. You could charge then when it is a success
+6. of course if there was an error you don't want to update their subscription
+7. You think because `echo 'Update subscription';` is under `$gateway->charge('123', 25.00);` it would run
+8. But if at any point an exception is throw it will stop and not execute next line of code
+9. It will immediately jump to the catch block
+10. It would kill the page in this case and never update user subscription
+```php
+$gateway = new PaymentGateway;
+
+try {
+    $gateway->charge('123', 25.00);
+    // update subscription
+    echo 'Update subscription';
+} catch (Exception $e) {
+    die('Payment failed'); // Payment failed
+}
+```
+8. Its very straight forward
+9. For now we been using PHP own exceptions
+10. We can make this even more useful by creating our own exceptions
+
+#### Custom Exception
+1. First create a class named GatewayPaymentFailedException
+2. Notice name is long but very descriptive
+
+```php
+
+# remember this may be in a separate file in a directory where you store all your exceptions
+class GatewayPaymentFailedException extends Exception
+{
+}
+
+class PaymentGateway
+{
+    public function charge($token, $amount)
+    {
+        if (1) {
+            throw new GatewayPaymentFailedException('Payment failed');
+        }
+    }
+}
+
+$gateway = new PaymentGateway;
+
+try {
+    $gateway->charge('123', 25.00);
+    echo 'Update subscription';
+} catch (GatewayPaymentFailedException $e) {
+    die('Payment failed'); 
+}
+```
+3. What we do to catch 2 different Exceptions is to create another catch
+4. We are catch both but if we set one if to 1 and other zero in charge method we will only need one of them
+```php
+class GatewayPaymentFailedException extends Exception
+{
+    //
+}
+
+class InvalidGatewayTokenException extends Exception
+{
+    //
+}
+
+class PaymentGateway
+{
+    public function charge($token, $amount)
+    {
+
+        // Check if token is valid
+
+        if (0) {
+            throw new InvalidGatewayTokenException; //  Fatal error: Uncaught Exception: Payment failed
+        }
+
+        if (1) {
+            throw new GatewayPaymentFailedException; //  Fatal error: Uncaught Exception: Payment failed
+        }
+    }
+}
+
+$gateway = new PaymentGateway;
+
+try {
+    $gateway->charge('123', 25.00);
+    echo 'Update subscription';
+} catch (GatewayPaymentFailedException $e) {
+    die('Payment failed');
+} catch (InvalidGatewayTokenException $e) {
+    die('Invalid token');
+}
+
+```
+5. Write a specific message to both Exception
+6. Now if we see the PHP manual you can see you can set protected property
+7. <https://www.php.net/manual/en/language.exceptions.php>
+```php
+# remember this may be in a separate file in a directory where you store all your exceptions
+class GatewayPaymentFailedException extends Exception
+{
+    protected $message = 'Payment failed';
+}
+
+class InvalidGatewayTokenException extends Exception
+{
+    protected $message = 'Invalid token';
+}
+
+class PaymentGateway
+{
+    public function charge($token, $amount)
+    {
+
+        // Check if token is valid
+
+        if (0) {
+            throw new InvalidGatewayTokenException; //  Fatal error: Uncaught Exception: Payment failed
+        }
+
+        if (1) {
+            throw new GatewayPaymentFailedException; //  Fatal error: Uncaught Exception: Payment failed
+        }
+    }
+}
+
+$gateway = new PaymentGateway;
+
+try {
+    $gateway->charge('123', 25.00);
+    echo 'Update subscription';
+} catch (GatewayPaymentFailedException $e) {
+    die('Payment failed');
+} catch (InvalidGatewayTokenException $e) {
+    die('Invalid token');
+}
+```
+8. Use Methods available we going to use getMessage
+```php
+
+try {
+    $gateway->charge('123', 25.00);
+    echo 'Update subscription';
+} catch (GatewayPaymentFailedException $e) {
+    // die('Payment failed');
+    die($e->getMessage());
+} catch (InvalidGatewayTokenException $e) {
+    // die('Invalid token');
+    die($e->getMessage());
+}
+```
+9. If you add too many catch it could get very messy
+10. So you will come to a point where you want to catch a general exception then catch a message
+11. So what we can do is carch a general gateway
+12. PaymentGatewayException will account for the other 2 exceptions that are subclasses of the base Exception
+```php
+try {
+    $gateway->charge('123', 25.00);
+    echo 'Update subscription';
+} catch (PaymentGatewayException $e) {
+    die($e->getMessage());
+}
+```
+#### Using the finally part of try and catch
+1. You may no need to use finally
+2. What finally does is it will always run whenever try or catch runs
+```php
+try {
+    $gateway->charge('123', 25.00);
+    echo 'Update subscription';
+} catch (PaymentGatewayException $e) {
+    // die($e->getMessage());
+} finally {
+    die('finally');
+}
+```
+3. This what Exception is
+```php
+class PaymentGatewayException extends Exception
+{
+}
+
+# remember this may be in a separate file in a directory where you store all your exceptions
+class GatewayPaymentFailedException extends PaymentGatewayException
+{
+    protected $message = 'Payment failed';
+}
+
+class InvalidGatewayTokenException extends PaymentGatewayException
+{
+    protected $message = 'Invalid token';
+}
+
+class PaymentGateway
+{
+    public function charge($token, $amount)
+    {
+
+        // Check if token is valid
+
+        if (0) {
+            throw new InvalidGatewayTokenException; //  Fatal error: Uncaught Exception: Payment failed
+        }
+
+        if (1) {
+            throw new GatewayPaymentFailedException; //  Fatal error: Uncaught Exception: Payment failed
+        }
+    }
+}
+
+$gateway = new PaymentGateway;
+
+try {
+    $gateway->charge('123', 25.00);
+    echo 'Update subscription';
+} catch (PaymentGatewayException $e) {
+    // die($e->getMessage());
+} finally {
+    die('finally');
+}
+```
+4. You should use Exceptions to tidy the code and control the flow of the app.
+
+
+
+
+

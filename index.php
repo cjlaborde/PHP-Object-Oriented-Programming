@@ -21,6 +21,7 @@
         <li><a href="/10-typehinting">Typehinting</a></li>
         <li><a href="/11-static-properties-and-methods">Static properties and methods</a></li>
         <li><a href="/12-traits">Traits</a></li>
+        <li><a href="/13-exceptions">Exceptions</a></li>
     </ul>
 </body>
 
