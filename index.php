@@ -22,6 +22,7 @@
         <li><a href="/11-static-properties-and-methods">Static properties and methods</a></li>
         <li><a href="/12-traits">Traits</a></li>
         <li><a href="/13-exceptions">Exceptions</a></li>
+        <li><a href="/14-dependency-injection">Dependency Injection</a></li>
     </ul>
 </body>
 

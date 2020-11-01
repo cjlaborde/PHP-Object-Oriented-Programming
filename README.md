@@ -2436,6 +2436,203 @@ try {
 ```
 4. You should use Exceptions to tidy the code and control the flow of the app.
 
+### Dependency Injection
+1. Understanding depency injection is fundamental to writting good code.
+2. May take some time to get use to it, but once you do understand it.
+3. It may take time to get used to but once you do,It should tie everything together nicely
+4. The first thing we need to cover before we look in the concept of depency injection is magic method.
+5. We going to look at the construct of magic methods.
+#### Magic Methods
+1. Magic method start with __ we use them as normal methods within classes
+2. The only difference is they do something depending on what we are doing with an object.
+3. lets look at an example
+4. It looks like normal method except it says __construct
+5. The content of the magic method __construct are been run when we instantiate a class
+```php
+class TwitterManager
+{
+    public function __construct()
+    {
+        var_dump('hello');
+    }
+}
+
+$twitterManager = new TwitterManager; // hello
+```
+5. When we create new instance, we can also pass arguments that the constructor will pick up.
+```php
+class TwitterManager
+{
+    public function __construct($handle)
+    {
+        // var_dump('hello');
+        var_dump($handle); // john9000
+    }
+}
+
+// $twitterManager = new TwitterManager; // hello
+$twitterManager = new TwitterManager('john9000');
+```
+6. Now what we can actually do is use what we pass to our constructor to the rest of our class
+7. So if we have another method in our class and we want to use $handle on it
+8. Here is how we do it and now we can use $handle on the other methods
+```php
+class TwitterManager
+{
+    protected $handle;
+
+    public function __construct($handle)
+    {
+        $this->handle = $handle;
+    }
+
+    public function getHandle()
+    {
+        return $this->handle;
+    }
+}
+
+$twitterManager = new TwitterManager('john9000');
+
+echo $twitterManager->getHandle(); // john9000
+```
+9. Now we going to look at a more useful example
+
+#### Concept of depency injection
+1. This means we can pass other objects that we have already instantiated into a class
+2. Know that we discussed that an object can easily be passed around our application
+3. We can create another class and instantiate it and then we can pass it to other classes to be used within there.
+4. In other words we can inject these into a another class
+5. Now because the class will now depend on what we inject
+6. We now have dependency injection
+7. Lets think about a class and how it may depend on another one
+8. So that we can make this very clear
+9. What would happen if we got another method that use $handle to output the tweet of the user
+10. We may have another class responsable for hitting the twitter api
+11. and performing the operation of getting a list of these tweets
+12. What we want to do then is use this and inject it into our twitter manager
+13. So that we can use it
+14. Lets look at how this would look
+```php
+class TwitterClient
+{
+    // takes in an handle
+    public function getTweets($handle)
+    {
+        // here we return some fake data
+        return [
+            'This is a tweet',
+            'Another tweet',
+        ];
+    }
+}
+
+# Now our twitter manager depends on our twitter client.
+class TwitterManager
+{
+    protected $client;
+
+    # we can actually use typehinting to make sure what we pass in what we expect
+    # We are injecting TwitterClient here
+    public function __construct(TwitterClient $client)
+    {
+        $this->client = $client;
+    }
+
+    public function getTweetsByUser($handle)
+    {
+        # now since we injecting we can use TwitterClient method getTweets
+        # what we may do as well here is either sort, format, paginate them or anything else
+        # this is why we have 2 separate classes
+        return $this->client->getTweets($handle);
+    }
+}
+
+# bare in mind that this could be external package that you pull down and you might that
+# you can use within your own twitter manager and create your own method
+# essentially create an adapter or wrapper
+$twitterClient = new TwitterClient;
+
+$twitterManager = new TwitterManager($twitterClient);
+
+var_dump($twitterManager->getTweetsByUser('john9000'));
+/*
+array (size=2)
+  0 => string 'This is a tweet' (length=15)
+  1 => string 'Another tweet' (length=13)
+*/
+```
+15. Why can't our twitter manager contain all of the code and we have 2 classes instead which would be easier that creating a separate class and injecting this in.
+16. The reason we have split this into 2 classes and reason we would normally do this.
+17. Is that each have their own responsability
+18. This is an important concept with programming in general
+19. We have a class that is responsible only for hitting the Twitter api
+20. We have a class that is only responsible for doing something with data
+21. Grabbing tweets or grabbing a single tweet or created tweet
+22. Either way we don't want to be writing lots of code in here
+23. A good to test this is look at the content of a method and immediately you should be able to tell what this is actually doing.
+24. If you can't then that means your method content is probably too long
+25. We can probably pass multiple dependencies into 1 class if we need to.
+26. Lets imagine we have some class of paginator class that is responsable for paginator
+27. Just breaking this up in small pieces that we can show page by page
+28. We might want to paginate on tweets
+```php
+class TwitterClient
+{
+    // takes in an handle
+    public function getTweets($handle)
+    {
+        // here we return some fake data
+        return [
+            'This is a tweet',
+            'Another tweet',
+        ];
+    }
+}
+
+class Paginator
+{
+}
+
+class TwitterManager
+{
+    protected $paginator;
+
+    // When we grab TwitterClient may as well grab Pagination as wee
+    public function __construct(TwitterClient $client, Paginator $paginator)
+    {
+        $this->client = $client;
+        $this->paginator = $paginator;
+    }
+
+    public function getTweetsByUser($handle)
+    {
+        // in here we pass the list of items we are passing as first argument
+        // then pass the number of items as second argument
+        // Now we are returning a paginated result of the tweets
+        // We using the twitter client to pull the results
+        return $this->paginator->paginate($this->client->getTweets($handle), 10);
+    }
+}
+
+$twitterClient = new TwitterClient;
+
+$twitterManager = new TwitterManager($twitterClient);
+
+var_dump($twitterManager->getTweetsByUser('john9000'));
+```
+29. There are some clever things that some frameworks and packages do
+30. For example allow you to automatically inject classes via a controller by providing their classname or interfaces this is call auto wiring
+
+
+
+
+
+
+
+
+
+
 
 
 
