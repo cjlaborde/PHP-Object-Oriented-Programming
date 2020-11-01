@@ -2624,9 +2624,146 @@ var_dump($twitterManager->getTweetsByUser('john9000'));
 29. There are some clever things that some frameworks and packages do
 30. For example allow you to automatically inject classes via a controller by providing their classname or interfaces this is call auto wiring
 
+### Method Chaining
+1. We have covered the syntax and theory behind object orriented programming.
+2. Method chaining comes a lot of frameworks and packages
+3. Even if you are not working with a framework or package
+4. Using method chaining in your code will make it more fluid
+5. Lets look at example how method chaining can improve existing code
+6. For example lets say we have search request
+7. What we want to search is messy
+```php
+# what this will be responsable for is building the properties for a search for which will then
+# pass to a search service, which will give us back a list of results
+$request = new SearchRequest;
 
+# this will be simple class that have setters and getters
 
+# what we want to search
+$request->setQuery('oop');
+$request->setLimit(100);
+$request->setPerPage(10);
+```
+8. What if we could do something like the following
+9. We can actually do this and this is where method chaining comes in
+10. This looks a lot nicer
+11. you don't to keep repeating request
+12. Now we have a request we can past through our search service class
+```php
+$request->setQuery('oop')->setLimit(100)->setPerPage(10);
+```
+13. The benefit here is easier to write code
+14. again thinking about this from another developer perspective
+15. This is one way to pass things through via search service
+```php
 
+class SearchRequest
+{
+    protected $query;
+
+    protected $limit;
+
+    public function setQuery($query)
+    {
+        $this->query = $query;
+    }
+
+    public function setLimit($limit = 100)
+    {
+        $this->limit = $limit;
+    }
+
+    public function getQuery()
+    {
+        return $this->query;
+    }
+
+    public function getLimit()
+    {
+        return $this->limit;
+    }
+}
+
+class SearchService
+{
+    # would allow us to search a database or external service
+    # this will take in some kind of request
+    public function search(SearchRequest $request)
+    {
+        var_dump($request);
+        # we have search request and query limit
+        /*
+            object(SearchRequest)[3]
+                protected 'query' => string 'oop' (length=3)
+                protected 'limit' => int 50
+        */
+    }
+}
+
+$service = new SearchService;
+$request = new SearchRequest;
+
+$request->setQuery('oop');
+$request->setLimit(50);
+
+$service->search($request);
+```
+16. But what we want to focus on is method chaining.
+17. What would happen if we do something like this.
+18. You will get error.
+19. The reason is we trying to call setLimit on null
+20. Means we calling setLimit method on the result of the return value of setQuery
+21. So at the moment setQuery doesn't return anything at all
+22. Well it does technically return null
+23. So we can't call ->setLimit(50)
+```php
+// Uncaught Error: Call to a member function setLimit() on null
+$request->setQuery('oop')->setLimit(50); 
+```
+24. So how do we chain them together to get access to the protected properties without calling the methods?
+25. Remember when we did a var_dump($this) it represent current object you working with
+26. so by returning $this from each method
+27. You would not have to do this from the getters
+28. All we doing is we are going to set it setQuery 
+29. add `return $this;` to all the set Methods
+
+```php
+    $request->setQuery('oop')->setLimit(50); 
+
+    public function setQuery($query)
+    {
+        $this->query = $query;
+
+        return $this;
+    }
+
+    public function setLimit($limit = 100)
+    {
+        $this->limit = $limit;
+
+        return $this;
+    }
+
+  /*
+    object(SearchRequest)[3]
+        protected 'query' => string 'oop' (length=3)
+        protected 'limit' => int 50
+  */
+```
+28. Now rather than getting error we get that same result
+29. Of course this was very basic
+30. but there are other uses for method chaining
+31. You may see in some framework called packages
+32. Here is an example where you subscribe to monthly plan, set token and subscribe
+33. This works nicely since is easier to write and read in just 1 line
+34. If you find yourself with lots of methods you can organize by the arrows
+```php
+$user->subscribeTo('monthly')
+     ->setToken('123')
+     ->subscribe();
+```
+35. Remember that this can be abused as well
+36. But if it makes sense and makes your code a lot more fluid go ahead and use it.
 
 
 
