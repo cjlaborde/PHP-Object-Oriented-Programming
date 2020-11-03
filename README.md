@@ -2766,6 +2766,8 @@ $user->subscribeTo('monthly')
 36. But if it makes sense and makes your code a lot more fluid go ahead and use it.
 
 
+### Autoloading and structure
+1. `composer dump-autoload`
 
 
 
