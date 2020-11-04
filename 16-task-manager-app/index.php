@@ -2,6 +2,7 @@
 
 use Todo\Models\Task;
 use Todo\Storage\MySqlDatabaseTaskStorage;
+use Todo\TaskManager;
 
 require 'vendor/autoload.php';
 
@@ -13,8 +14,109 @@ $db = new PDO('mysql:host=127.0.0.1;dbname=todo', 'root', '');
 $storage = new MySqlDatabaseTaskStorage($db);
 // var_dump($storage); // object(Todo\Storage\MySqlDatabaseTaskStorage)[3]
 
+### Task Manager
+# we need to pass in our $storage dependencies
+// $mananger = new TaskManager(new MySqlDatabaseTaskStorage($db));
+$manager = new TaskManager($storage);
 
-// /*
+#### get tasks
+$tasks = $manager->getTasks();
+
+## we get back a list of models
+## through this we can loop through them
+## display them in a view
+var_dump($tasks);
+## We get list of tasks as a model
+/*
+array (size=7)
+  0 => 
+    object(Todo\Models\Task)[7]
+      protected 'id' => string '3' (length=1)
+      protected 'complete' => string '0' (length=1)
+      protected 'description' => string 'Drink more coffee' (length=17)
+      protected 'due' => string '2022-11-03 20:27:53' (length=19)
+  1 => 
+    object(Todo\Models\Task)[8]
+      protected 'id' => string '4' (length=1)
+      protected 'complete' => string '1' (length=1)
+      protected 'description' => string 'Learn oop' (length=9)
+      protected 'due' => string '2020-11-05 18:10:42' (length=19)
+  2 => 
+    object(Todo\Models\Task)[9]
+      protected 'id' => string '5' (length=1)
+      protected 'complete' => string '0' (length=1)
+      protected 'description' => string 'Drink coffee' (length=12)
+      protected 'due' => string '2020-11-03 18:50:08' (length=19)
+  3 => 
+    object(Todo\Models\Task)[10]
+      protected 'id' => string '6' (length=1)
+      protected 'complete' => string '0' (length=1)
+      protected 'description' => string 'Drink coffee' (length=12)
+      protected 'due' => string '2020-11-03 18:51:32' (length=19)
+  4 => 
+    object(Todo\Models\Task)[11]
+      protected 'id' => string '7' (length=1)
+      protected 'complete' => string '0' (length=1)
+      protected 'description' => string 'A new task' (length=10)
+      protected 'due' => string '2020-11-04 05:29:21' (length=19)
+  5 => 
+    object(Todo\Models\Task)[12]
+      protected 'id' => string '8' (length=1)
+      protected 'complete' => string '0' (length=1)
+      protected 'description' => string 'A new task' (length=10)
+      protected 'due' => string '2020-11-04 05:29:23' (length=19)
+  6 => 
+    object(Todo\Models\Task)[13]
+      protected 'id' => string '9' (length=1)
+      protected 'complete' => string '0' (length=1)
+      protected 'description' => string 'A new task' (length=10)
+      protected 'due' => string '2020-11-04 05:31:10' (length=19)
+*/
+
+#### Updating class
+/*
+
+$task = $manager->getTask(4);
+$task->setComplete(); // no need to set true since is set as default in Task class
+
+$manager->updateTask($task);
+*/
+
+
+
+
+/*
+$task = new Task;
+$task->setDescription('A new task');
+$task->setDue(new DateTime);
+
+// $mananger->addTask($task);
+*/
+// $storeTask = $mananger->addTask($task);
+
+// redirect using $storeTask->getId() // since now we have that method to grab the id.
+
+// var_dump($mananger->addTask($task));
+/*
+object(Todo\Models\Task)[10]
+  protected 'id' => string '9' (length=1)
+  protected 'complete' => string '0' (length=1)
+  protected 'description' => string 'A new task' (length=10)
+  protected 'due' => string '2020-11-04 05:31:10' (length=19)
+*/
+
+
+// var_dump($mananger);
+/*
+object(Todo\TaskManager)[5]
+  protected 'storage' => 
+    object(Todo\Storage\MySqlDatabaseTaskStorage)[3]
+      protected 'db' => 
+        object(PDO)[4]
+*/
+
+
+/*
 $task = $storage->get(3);
 $task->setDescription('Drink more coffee');
 $task->setDue(new DateTime('+2 year'));
@@ -22,7 +124,7 @@ $task->setComplete(false);
 
 var_dump($storage->update($task));
 
-// */
+*/
 /*
 object(Todo\Models\Task)[9]
   protected 'id' => string '3' (length=1)

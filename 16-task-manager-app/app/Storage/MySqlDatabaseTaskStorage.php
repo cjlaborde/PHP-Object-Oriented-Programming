@@ -32,7 +32,8 @@ class MySqlDatabaseTaskStorage implements TaskStorageInterface
         //     'complete' => $task->getComplete() ? 1 : 0,
         // ]);
 
-        return $this->db->lastInsertId();
+        # when we store a task we return the last inserted id
+        return $this->get($this->db->lastInsertId());
     }
 
     public function update(Task $task)
@@ -57,6 +58,8 @@ class MySqlDatabaseTaskStorage implements TaskStorageInterface
         //     'due' => $task->getDue()->format('Y-m-d H:i:s'),
         //     'complete' => $task->getComplete() ? 1 : 0,
         // ]);
+
+        # when we update task we return this get
         return $this->get($task->getId());
     }
 
