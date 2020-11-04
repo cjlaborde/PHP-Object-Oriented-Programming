@@ -23,12 +23,14 @@ class MySqlDatabaseTaskStorage implements TaskStorageInterface
             VALUES (:description, :due, :complete)
         ");
 
-        $statement->execute([
-            'description' => $task->getDescription(),
-            'due' => $task->getDue()->format('Y-m-d H:i:s'),
-            # if true value insert 1 else false insert 0 using ternary operator
-            'complete' => $task->getComplete() ? 1 : 0,
-        ]);
+        $statement->execute($this->buildColumns($task));
+
+        // $statement->execute([
+        //     'description' => $task->getDescription(),
+        //     'due' => $task->getDue()->format('Y-m-d H:i:s'),
+        //     # if true value insert 1 else false insert 0 using ternary operator
+        //     'complete' => $task->getComplete() ? 1 : 0,
+        // ]);
 
         return $this->db->lastInsertId();
     }
@@ -44,13 +46,17 @@ class MySqlDatabaseTaskStorage implements TaskStorageInterface
             WHERE id = :id
         ");
 
-        $statement->execute([
-            # we are updating when this id matches
+        # Here we want to pass id as we did before.
+        $statement->execute($this->buildColumns($task, [
             'id' => $task->getId(),
-            'description' => $task->getDescription(),
-            'due' => $task->getDue()->format('Y-m-d H:i:s'),
-            'complete' => $task->getComplete() ? 1 : 0,
-        ]);
+        ]));
+        // $statement->execute([
+        //     # we are updating when this id matches
+        //     'id' => $task->getId(),
+        //     'description' => $task->getDescription(),
+        //     'due' => $task->getDue()->format('Y-m-d H:i:s'),
+        //     'complete' => $task->getComplete() ? 1 : 0,
+        // ]);
         return $this->get($task->getId());
     }
 
@@ -84,5 +90,15 @@ class MySqlDatabaseTaskStorage implements TaskStorageInterface
         $statement->execute();
 
         return $statement->fetchAll();
+    }
+
+    protected function buildColumns(Task $task, array $additional = [])
+    {
+        # will combine with anything passed from $additional = []
+        return array_merge([
+            'description' => $task->getDescription(),
+            'due' => $task->getDue()->format('Y-m-d H:i:s'),
+            'complete' => $task->getComplete() ? 1 : 0,
+        ], $additional);
     }
 }

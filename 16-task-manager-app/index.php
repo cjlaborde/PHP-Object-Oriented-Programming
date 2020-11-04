@@ -14,15 +14,15 @@ $storage = new MySqlDatabaseTaskStorage($db);
 // var_dump($storage); // object(Todo\Storage\MySqlDatabaseTaskStorage)[3]
 
 
-/*
+// /*
 $task = $storage->get(3);
 $task->setDescription('Drink more coffee');
-$task->setDue(new DateTime('+1 year'));
-$task->setComplete();
+$task->setDue(new DateTime('+2 year'));
+$task->setComplete(false);
 
 var_dump($storage->update($task));
 
-*/
+// */
 /*
 object(Todo\Models\Task)[9]
   protected 'id' => string '3' (length=1)
